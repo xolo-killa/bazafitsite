@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Профиль</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        input { display: block; margin: 10px 0; padding: 8px; width: 100%; }
+        button { padding: 10px 20px; }
+    </style>
+</head>
+<body>
+    <h2>Редактировать профиль</h2>
+    <label>Пол: <input id="gender" /></label>
+    <label>Возраст: <input id="age" type="number"></label>
+    <label>Вес (кг): <input id="weight" type="number" /></label>
+    <label>Рост (см): <input id="height" type="number" /></label>
+    <label>Цель: <input id="goal" /></label>
+    <button onclick="saveProfile()">Сохранить</button>
+ <script>
+    const tg = window.Telegram.WebApp;
+    const userId = tg.initDataUnsafe.user.id;
+
+    fetch(`http://127.0.0.1:5000/get_profile?user_id=${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('gender').value = data.gender;
+        document.getElementById('age').value = data.age;
+        document.getElementById('weight').value = data.weight;
+        document.getElementById('height').value = data.height;
+        document.getElementById('goal').value = data.goal;
+      });
+
+    function saveProfile() {
+      const profile = {
+        user_id: userId,
+        gender: document.getElementById('gender').value,
+        age: document.getElementById('age').value,
+        weight: document.getElementById('weight').value,
+        height: document.getElementById('height').value,
+        goal: document.getElementById('goal').value
+      };
+
+      fetch('http://127.0.0.1:5000/save_profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profile)
+      }).then(() => {
+        tg.close(); // Закрыть мини-приложение
+      });
+    }
+  </script>
+</body>
+</html>
