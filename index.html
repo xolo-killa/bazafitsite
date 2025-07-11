@@ -65,7 +65,13 @@
 <div class="container">
   <h2>Редактировать профиль</h2>
   <label for="gender">Пол</label>
-  <input id="gender">
+<select id="gender">
+  <option value="">— выбери —</option>
+  <option value="Мужчина">Мужчина</option>
+  <option value="Женщина">Женщина</option>
+</select>
+
+
 
   <label for="age">Возраст</label>
   <input id="age" type="number">
@@ -76,8 +82,13 @@
   <label for="height">Рост (см)</label>
   <input id="height" type="number">
 
-  <label for="goal">Цель</label>
-  <input id="goal">
+<label for="goal">Цель</label>
+<select id="goal">
+  <option value="">— выбери —</option>
+  <option value="Похудение">🏃 Похудение</option>
+  <option value="Набор массы">💪 Набор массы</option>
+  <option value="Поддержание формы">⚖️ Поддержание формы</option>
+</select>
 
   <button onclick="saveProfile()">Сохранить</button>
 </div>
@@ -88,7 +99,7 @@
   const userId = tg.initDataUnsafe?.user?.id;
 
   function loadProfile() {
-    fetch(`https://your-server.com/get_profile?user_id=${userId}`)
+    fetch(`https://bazafitbackend.onrender.com/get_profile?user_id=${userId}`)
       .then(res => res.json())
       .then(data => {
         if (data) {
@@ -112,7 +123,7 @@
       goal: document.getElementById('goal').value
     };
 
-    fetch('https://your-server.com/save_profile', {
+    fetch('https://bazafitbackend.onrender.com/save_profile', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(profile)
