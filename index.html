@@ -59,6 +59,15 @@
     button:hover {
       background-color: #2b95db;
     }
+    select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+    box-sizing: border-box;
+  }
+
   </style>
 </head>
 <body>
@@ -95,9 +104,14 @@
 
 <script>
   const tg = window.Telegram.WebApp;
-  tg.expand(); // Расширить на весь экран
-  console.log("initDataUnsafe:", tg.initDataUnsafe);
-  const userId = tg.initDataUnsafe?.user?.id;
+  tg.expand();
+
+  let userId = tg.initDataUnsafe?.user?.id;
+  if (!userId) {
+    const urlParams = new URLSearchParams(window.location.search);
+    userId = urlParams.get('id');
+  }
+
 
   function loadProfile() {
     fetch(`https://bazafitbackend.onrender.com/get_profile?user_id=${userId}`)
