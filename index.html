@@ -96,6 +96,7 @@
 <script>
   const tg = window.Telegram.WebApp;
   tg.expand(); // Расширить на весь экран
+  console.log("initDataUnsafe:", tg.initDataUnsafe);
   const userId = tg.initDataUnsafe?.user?.id;
 
   function loadProfile() {
