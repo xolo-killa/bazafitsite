@@ -109,9 +109,10 @@
   let userId = tg.initDataUnsafe?.user?.id;
   if (!userId) {
     const urlParams = new URLSearchParams(window.location.search);
-    userId = urlParams.get('id');
+    userId = parseInt(urlParams.get('id')); // <--- добавь parseInt
   }
   console.log('userId:', userId);
+
 
 
   function loadProfile() {
