@@ -117,17 +117,26 @@
 
   function loadProfile() {
     fetch(`https://bazafitbackend.onrender.com/get_profile?user_id=${userId}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data) {
-          document.getElementById('gender').value = data.gender || '';
-          document.getElementById('age').value = data.age || '';
-          document.getElementById('weight').value = data.weight || '';
-          document.getElementById('height').value = data.height || '';
-          document.getElementById('goal').value = data.goal || '';
-        }
-      })
-      .catch(err => console.error('Ошибка при загрузке профиля:', err));
+<!--      .then(res => res.json())-->
+<!--      .then(data => {-->
+<!--        if (data) {-->
+<!--          document.getElementById('gender').value = data.gender || '';-->
+<!--          document.getElementById('age').value = data.age || '';-->
+<!--          document.getElementById('weight').value = data.weight || '';-->
+<!--          document.getElementById('height').value = data.height || '';-->
+<!--          document.getElementById('goal').value = data.goal || '';-->
+<!--        }-->
+<!--      })-->
+<!--      .catch(err => console.error('Ошибка при загрузке профиля:', err));-->
+          .then(async res => {
+          const text = await res.text();
+          console.log('Ответ:', text);
+          if (res.ok) {
+            tg.close(); // закрыть окно Telegram
+          } else {
+            alert('Ошибка при сохранении профиля: ' + text);
+          }
+        })
   }
 
   function saveProfile() {
