@@ -158,26 +158,6 @@
     console.error(err);
   });
 }
-
-
-    fetch('https://bazafitbackend.onrender.com/save_profile', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(profile)
-    })
-    .then(res => {
-      if (res.ok) {
-        tg.close(); // Закрыть mini-app
-      } else {
-        alert('Ошибка при сохранении профиля');
-      }
-    })
-    .catch(err => {
-      alert('Ошибка при подключении к серверу');
-      console.error(err);
-    });
-  }
-
   loadProfile();
 </script>
 </body>
