@@ -114,40 +114,51 @@
   console.log('userId:', userId);
 
 
-
   function loadProfile() {
-    fetch(`https://bazafitbackend.onrender.com/get_profile?user_id=${userId}`)
-<!--      .then(res => res.json())-->
-<!--      .then(data => {-->
-<!--        if (data) {-->
-<!--          document.getElementById('gender').value = data.gender || '';-->
-<!--          document.getElementById('age').value = data.age || '';-->
-<!--          document.getElementById('weight').value = data.weight || '';-->
-<!--          document.getElementById('height').value = data.height || '';-->
-<!--          document.getElementById('goal').value = data.goal || '';-->
-<!--        }-->
-<!--      })-->
-<!--      .catch(err => console.error('Ошибка при загрузке профиля:', err));-->
-          .then(async res => {
-          const text = await res.text();
-          console.log('Ответ:', text);
-          if (res.ok) {
-            tg.close(); // закрыть окно Telegram
-          } else {
-            alert('Ошибка при сохранении профиля: ' + text);
-          }
-        })
-  }
+  fetch(`https://bazafitbackend.onrender.com/get_profile?user_id=${userId}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data) {
+        document.getElementById('gender').value = data.gender || '';
+        document.getElementById('age').value = data.age || '';
+        document.getElementById('weight').value = data.weight || '';
+        document.getElementById('height').value = data.height || '';
+        document.getElementById('goal').value = data.goal || '';
+      }
+    })
+    .catch(err => console.error('Ошибка при загрузке профиля:', err));
+}
+
+
 
   function saveProfile() {
-    const profile = {
-      user_id: userId,
-      gender: document.getElementById('gender').value,
-      age: parseInt(document.getElementById('age').value),
-      weight: parseFloat(document.getElementById('weight').value),
-      height: parseFloat(document.getElementById('height').value),
-      goal: document.getElementById('goal').value
-    };
+  const profile = {
+    user_id: userId,
+    gender: document.getElementById('gender').value,
+    age: parseInt(document.getElementById('age').value),
+    weight: parseFloat(document.getElementById('weight').value),
+    height: parseFloat(document.getElementById('height').value),
+    goal: document.getElementById('goal').value
+  };
+
+  fetch('https://bazafitbackend.onrender.com/save_profile', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(profile)
+  })
+  .then(res => {
+    if (res.ok) {
+      tg.close(); // ← Вот ТУТ закрывается окно — после сохранения
+    } else {
+      alert('Ошибка при сохранении профиля');
+    }
+  })
+  .catch(err => {
+    alert('Ошибка при подключении к серверу');
+    console.error(err);
+  });
+}
+
 
     fetch('https://bazafitbackend.onrender.com/save_profile', {
       method: 'POST',
