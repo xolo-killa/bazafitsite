@@ -1,70 +1,173 @@
-from flask import Flask, request, jsonify
-import sqlite3
-import os
-from flask_cors import CORS
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Профиль</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+      color: #333;
+    }
 
-app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
 
-# DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'users.db'))
-DB_PATH = '/tmp/users.db'
-def get_db_connection():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
 
-def init_db():
-    conn = get_db_connection()
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            user_id INTEGER PRIMARY KEY,
-            gender TEXT,
-            age INTEGER,
-            weight REAL,
-            height REAL,
-            goal TEXT
-        )
-    ''')
-    conn.commit()
-    conn.close()
+    label {
+      display: block;
+      margin: 15px 0 5px;
+      font-weight: 500;
+    }
 
-@app.route('/get_profile')
-def get_profile():
-    user_id = request.args.get('user_id')
-    conn = get_db_connection()
-    user = conn.execute('SELECT gender, age, weight, height, goal FROM users WHERE user_id = ?', (user_id,)).fetchone()
-    conn.close()
-    if user:
-        return jsonify(dict(user))
-    else:
-        return jsonify({})
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
 
-@app.route('/save_profile', methods=['POST'])
-def save_profile():
-    data = request.json
-    conn = get_db_connection()
-    conn.execute('''
-        INSERT INTO users (user_id, gender, age, weight, height, goal)
-        VALUES (?, ?, ?, ?, ?, ?)
-        ON CONFLICT(user_id) DO UPDATE SET
-            gender=excluded.gender,
-            age=excluded.age,
-            weight=excluded.weight,
-            height=excluded.height,
-            goal=excluded.goal
-    ''', (
-        data['user_id'],
-        data['gender'],
-        data['age'],
-        data['weight'],
-        data['height'],
-        data['goal']
-    ))
-    conn.commit()
-    conn.close()
-    print('Получаем данные:', data)
-    return jsonify({"status": "ok"})
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      background-color: #30a7f7;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s ease-in-out;
+    }
 
-if __name__ == '__main__':
-    init_db()
-    app.run(host='0.0.0.0', port=5000)
+    button:hover {
+      background-color: #2b95db;
+    }
+    select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+    box-sizing: border-box;
+  }
+
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>Редактировать профиль</h2>
+  <label for="gender">Пол</label>
+<select id="gender">
+  <option value="">— выбери —</option>
+  <option value="Мужчина">Мужчина</option>
+  <option value="Женщина">Женщина</option>
+</select>
+
+
+
+  <label for="age">Возраст</label>
+  <input id="age" type="number">
+
+  <label for="weight">Вес (кг)</label>
+  <input id="weight" type="number">
+
+  <label for="height">Рост (см)</label>
+  <input id="height" type="number">
+
+<label for="goal">Цель</label>
+<select id="goal">
+  <option value="">— выбери —</option>
+  <option value="Похудение">🏃 Похудение</option>
+  <option value="Набор массы">💪 Набор массы</option>
+  <option value="Поддержание формы">⚖️ Поддержание формы</option>
+</select>
+
+  <button onclick="saveProfile()">Сохранить</button>
+</div>
+
+<script>
+  const tg = window.Telegram.WebApp;
+  tg.expand();
+
+  let userId = tg.initDataUnsafe?.user?.id;
+  if (!userId) {
+    const urlParams = new URLSearchParams(window.location.search);
+    userId = parseInt(urlParams.get('id')); // <--- добавь parseInt
+  }
+  console.log('userId:', userId);
+
+
+
+  function loadProfile() {
+    fetch(`https://bazafitbackend.onrender.com/get_profile?user_id=${userId}`)
+<!--      .then(res => res.json())-->
+<!--      .then(data => {-->
+<!--        if (data) {-->
+<!--          document.getElementById('gender').value = data.gender || '';-->
+<!--          document.getElementById('age').value = data.age || '';-->
+<!--          document.getElementById('weight').value = data.weight || '';-->
+<!--          document.getElementById('height').value = data.height || '';-->
+<!--          document.getElementById('goal').value = data.goal || '';-->
+<!--        }-->
+<!--      })-->
+<!--      .catch(err => console.error('Ошибка при загрузке профиля:', err));-->
+          .then(async res => {
+          const text = await res.text();
+          console.log('Ответ:', text);
+          if (res.ok) {
+            tg.close(); // закрыть окно Telegram
+          } else {
+            alert('Ошибка при сохранении профиля: ' + text);
+          }
+        })
+  }
+
+  function saveProfile() {
+    const profile = {
+      user_id: userId,
+      gender: document.getElementById('gender').value,
+      age: parseInt(document.getElementById('age').value),
+      weight: parseFloat(document.getElementById('weight').value),
+      height: parseFloat(document.getElementById('height').value),
+      goal: document.getElementById('goal').value
+    };
+
+    fetch('https://bazafitbackend.onrender.com/save_profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(profile)
+    })
+    .then(res => {
+      if (res.ok) {
+        tg.close(); // Закрыть mini-app
+      } else {
+        alert('Ошибка при сохранении профиля');
+      }
+    })
+    .catch(err => {
+      alert('Ошибка при подключении к серверу');
+      console.error(err);
+    });
+  }
+
+  loadProfile();
+</script>
+</body>
+</html>
