@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <title>Профиль</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link rel="stylesheet" href="style.css">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 <div class="container">
@@ -19,22 +19,18 @@
         <option value="Женщина">Женщина</option>
       </select>
     </div>
-
     <div class="form-group">
       <label for="age">Возраст</label>
       <input id="age" type="number" min="10" max="100" required>
     </div>
-
     <div class="form-group">
       <label for="weight">Вес (кг)</label>
       <input id="weight" type="number" min="20" max="300" step="0.1" required>
     </div>
-
     <div class="form-group">
       <label for="height">Рост (см)</label>
       <input id="height" type="number" min="100" max="250" required>
     </div>
-
     <div class="form-group">
       <label for="goal">Цель</label>
       <select id="goal" required>
@@ -48,6 +44,9 @@
   </form>
 </div>
 <script>
+  const SUPABASE_URL = "https://bcobuebwqxoipouzjxye.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjb2J1ZWJ3cXhvaXBvdXpqeHllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0MDQwMzYsImV4cCI6MjA2Nzk4MDAzNn0.bBogxKA8lSeir2HehMXFqTGR97BYSUnkrSR-oWelOv8";
+
   const tg = window.Telegram.WebApp;
   tg.expand();
 
@@ -57,22 +56,25 @@
     userId = parseInt(urlParams.get('id'));
   }
 
-  function loadProfile() {
-    fetch(`https://bazafitbackend.onrender.com/get_profile?user_id=${userId}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data) {
-          document.getElementById('gender').value = data.gender || '';
-          document.getElementById('age').value = data.age || '';
-          document.getElementById('weight').value = data.weight || '';
-          document.getElementById('height').value = data.height || '';
-          document.getElementById('goal').value = data.goal || '';
-        }
-      })
-      .catch(err => console.error('Ошибка при загрузке профиля:', err));
+  async function loadProfile() {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/users?user_id=eq.${userId}`, {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`
+      }
+    });
+    const data = await res.json();
+    if (data.length > 0) {
+      const profile = data[0];
+      document.getElementById('gender').value = profile.gender || '';
+      document.getElementById('age').value = profile.age || '';
+      document.getElementById('weight').value = profile.weight || '';
+      document.getElementById('height').value = profile.height || '';
+      document.getElementById('goal').value = profile.goal || '';
+    }
   }
 
-  document.getElementById('profileForm').addEventListener('submit', function(e) {
+  document.getElementById('profileForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const gender = document.getElementById('gender').value;
     const age = document.getElementById('age').value;
@@ -85,28 +87,23 @@
     }
     const profile = {
       user_id: userId,
-      gender: gender,
+      gender,
       age: parseInt(age),
       weight: parseFloat(weight),
       height: parseFloat(height),
-      goal: goal
+      goal
     };
-    fetch('https://bazafitbackend.onrender.com/save_profile', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(profile)
-    })
-    .then(res => {
-      if (res.ok) {
-        tg.close();
-      } else {
-        alert('Ошибка при сохранении профиля');
-      }
-    })
-    .catch(err => {
-      alert('Ошибка при подключении к серверу');
-      console.error(err);
+    await fetch(`${SUPABASE_URL}/rest/v1/users`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        "Content-Type": "application/json",
+        Prefer: "resolution=merge-duplicates"
+      },
+      body: JSON.stringify([profile])
     });
+    tg.close();
   });
 
   loadProfile();
