@@ -47,6 +47,8 @@ label {
 
 input, select {
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: 12px 10px;
   border: 1px solid #e0e6ed;
   border-radius: 8px;
